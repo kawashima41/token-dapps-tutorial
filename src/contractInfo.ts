@@ -1,176 +1,56 @@
 export default {
   Token: {
     // Every time you deploy a contract, you have to update address.
-    address: '0xc81daedc5d296b9ae0e74f6e3d6cbef1de890bc9',
+    // ブロックチェーンのアドレス
+    address: '0x1e3f93003c8a3b8eddf726fcc4ba7cf766935f76',
     // Every time you change the contract interface, you have to update abi.
     abi: [
       {
-        anonymous: false,
-        inputs: [
-          {
-            indexed: true,
-            name: 'owner',
-            type: 'address',
-          },
-          {
-            indexed: true,
-            name: 'spender',
-            type: 'address',
-          },
-          {
-            indexed: false,
-            name: 'value',
-            type: 'uint256',
-          },
-        ],
-        name: 'Approval',
-        type: 'event',
-      },
-      {
-        anonymous: false,
-        inputs: [
-          {
-            indexed: true,
-            name: 'from',
-            type: 'address',
-          },
-          {
-            indexed: true,
-            name: 'to',
-            type: 'address',
-          },
-          {
-            indexed: false,
-            name: 'value',
-            type: 'uint256',
-          },
-        ],
-        name: 'Transfer',
-        type: 'event',
-      },
-      {
-        constant: false,
-        inputs: [
-          {
-            name: 'spender',
-            type: 'address',
-          },
-          {
-            name: 'amount',
-            type: 'uint256',
-          },
-        ],
-        name: 'approve',
-        outputs: [
-          {
-            name: '',
-            type: 'bool',
-          },
-        ],
-        payable: false,
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        constant: false,
-        inputs: [
-          {
-            name: 'to',
-            type: 'address',
-          },
-          {
-            name: 'value',
-            type: 'uint256',
-          },
-        ],
-        name: 'transfer',
-        outputs: [
-          {
-            name: '',
-            type: 'bool',
-          },
-        ],
-        payable: false,
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        constant: false,
-        inputs: [
-          {
-            name: 'from',
-            type: 'address',
-          },
-          {
-            name: 'to',
-            type: 'address',
-          },
-          {
-            name: 'value',
-            type: 'uint256',
-          },
-        ],
-        name: 'transferFrom',
-        outputs: [
-          {
-            name: '',
-            type: 'bool',
-          },
-        ],
-        payable: false,
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        constant: false,
+        constant: true,
         inputs: [],
-        name: 'withdraw',
-        outputs: [],
-        payable: false,
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [
+        name: 'name',
+        outputs: [
           {
-            name: '_name',
+            name: '',
             type: 'string',
-          },
-          {
-            name: '_symbol',
-            type: 'string',
-          },
-          {
-            name: '_decimals',
-            type: 'uint8',
-          },
-          {
-            name: '_initialSupply',
-            type: 'uint256',
           },
         ],
         payable: false,
-        stateMutability: 'nonpayable',
-        type: 'constructor',
-      },
-      {
-        payable: true,
-        stateMutability: 'payable',
-        type: 'fallback',
+        stateMutability: 'view',
+        type: 'function',
       },
       {
         constant: true,
-        inputs: [
+        inputs: [],
+        name: 'totalSupply',
+        outputs: [
           {
-            name: 'owner',
-            type: 'address',
-          },
-          {
-            name: 'spender',
-            type: 'address',
+            name: '',
+            type: 'uint256',
           },
         ],
-        name: 'allowance',
+        payable: false,
+        stateMutability: 'view',
+        type: 'function',
+      },
+      {
+        constant: true,
+        inputs: [],
+        name: 'decimals',
+        outputs: [
+          {
+            name: '',
+            type: 'uint8',
+          },
+        ],
+        payable: false,
+        stateMutability: 'view',
+        type: 'function',
+      },
+      {
+        constant: true,
+        inputs: [],
+        name: 'ethBalance',
         outputs: [
           {
             name: '',
@@ -203,62 +83,6 @@ export default {
       {
         constant: true,
         inputs: [],
-        name: 'decimals',
-        outputs: [
-          {
-            name: '',
-            type: 'uint8',
-          },
-        ],
-        payable: false,
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        constant: true,
-        inputs: [],
-        name: 'exchangeRate',
-        outputs: [
-          {
-            name: '',
-            type: 'uint32',
-          },
-        ],
-        payable: false,
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        constant: true,
-        inputs: [],
-        name: 'name',
-        outputs: [
-          {
-            name: '',
-            type: 'string',
-          },
-        ],
-        payable: false,
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        constant: true,
-        inputs: [],
-        name: 'privilegedAccount',
-        outputs: [
-          {
-            name: '',
-            type: 'address',
-          },
-        ],
-        payable: false,
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        constant: true,
-        inputs: [],
         name: 'symbol',
         outputs: [
           {
@@ -271,18 +95,64 @@ export default {
         type: 'function',
       },
       {
-        constant: true,
+        constant: false,
         inputs: [],
-        name: 'totalSupply',
-        outputs: [
+        name: 'buyToken',
+        outputs: [],
+        payable: true,
+        stateMutability: 'payable',
+        type: 'function',
+      },
+      {
+        constant: false,
+        inputs: [
           {
-            name: '',
+            name: 'to',
+            type: 'address',
+          },
+          {
+            name: 'value',
             type: 'uint256',
           },
         ],
+        name: 'transfer',
+        outputs: [
+          {
+            name: '',
+            type: 'bool',
+          },
+        ],
         payable: false,
-        stateMutability: 'view',
+        stateMutability: 'nonpayable',
         type: 'function',
+      },
+      {
+        inputs: [],
+        payable: false,
+        stateMutability: 'nonpayable',
+        type: 'constructor',
+      },
+      {
+        anonymous: false,
+        inputs: [
+          {
+            indexed: true,
+            name: 'from',
+            type: 'address',
+          },
+          {
+            indexed: true,
+            name: 'to',
+            type: 'address',
+          },
+          {
+            indexed: false,
+            name: 'value',
+            type: 'uint256',
+          },
+        ],
+        name: 'Transfer',
+        type: 'event',
       },
     ],
   },

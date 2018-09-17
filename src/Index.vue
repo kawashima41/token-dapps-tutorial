@@ -1,206 +1,107 @@
 <template lang="pug">
-//- pug comment
 div
-  div.navbar-fixed
-    nav.teal
-      div.nav-wrapper
-        a.brand-logo {{ name }} |
-          small {{ totalSupply }} {{ symbol }} in total
-        ul.right 
-          li Your balance: {{ balance }} {{ symbol }}
+  h1 {{ title }}
+  h2 総発行量: {{ totalSupply }} {{ symbol }}
+  h2 あなたの残高: {{ balance }} {{ symbol }}
 
-  div.container  
-    div.row
-      div.col.s12.m6.l6
-        h2 Buy tokens
-        form(v-on:submit.prevent="onBuyToken")
-          label(for="buyAmount") Amount (wei)
-          input(id="buyAmount" ref="buyAmount" placeholder="1000000000000000000" type="text")
+  h2 By Tokens 
+  form(v-on:submit.prevent="onBuyToken")
+    input(type="text" ref="buyAmount")
+    input(type="submit" value="購入")
+
+  h2 Transfer Tokens 
+  form(v-on:submit.prevent="onTransferToken")
+    input(type="text" ref="transferTo")
+    input(type="text" ref="transferValue")
+    input(type="submit" value = "送金")
+  h2 Transaction List
   
-          input.btn(type="submit" value="Buy")
-    
-      div.col.s12.m6.l6
-        h2 Transfer token
-        form(v-on:submit.prevent="onTransferToken")
-          label(for="recipient") Recipient address
-          input(id="recipient" ref="recipient" placeholder="0xXXXXXXXXXXXXXXXXXXXX" type="text")
-  
-          label(for="amount") Amount (wei)
-          input(id="amount" ref="amount" placeholder="1000000000000000000" type="text")
-  
-          input.btn(type="submit" value="Send")
-    
-    div
-      ul.collection.with-header
-        li.collection-header
-          h4 Transaction list
-        li.collection-item(v-if="transactions.length === 0") No transactions.
-        li.collection-item(v-for="tx in transactions")
-          //- "etherscan + tx" is rendered like "https://ropsten.etherscan.io/tx/0xXXXXX"
-          a(:href="etherscan + tx" target="_blank") {{ tx }}
-          
+  ol
+    li(v-for="tx in transactions")
+        a(href="#") {{ tx }}
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
+
 import Web3 from 'web3';
-import { Contract } from 'web3/types.d';
-
+import ContractInfo from './contractInfo';
 import contractInfo from './contractInfo';
+import { Contract } from 'web3/types';
+import { setInterval } from 'timers';
 
-// Accessible from all functions
 let web3: Web3;
 let token: Contract;
+let address: string;
+
+const gasLimit = 3000000;
+const gasPrice = 10000000000;
 
 @Component
 export default class Index extends Vue {
-  // These variables are inserted into HTML above.
-  title = 'Token Viewer';
-  name = 'My token';
-  symbol = 'TKN';
-  totalSupply = '10000.000000000000000000';
-  address = '0x00000000000000000000';
+  title = 'kawaCoin Exchanged';
+  totalSupply = '0';
+  symbol = 'XXX';
   balance = '0.0';
-
-  // We define the type explicitly here because Typescript compiler gets angry :)
   transactions: string[] = [];
 
-  // The website where you can investgate transactions, addresses and so on.
-  etherscan = 'https://ropsten.etherscan.io/tx/';
-
-  /**
-   * One of Vue life-cycle functions.
-   * Called after all initialization of the Index Component is completed.
-   */
-  mounted() {
-    this.fetchWeb3(() => {
-      this.fetchFromBlockchain();
-    });
-  }
-
   onBuyToken() {
-    if (web3 === undefined || token === undefined) {
-      return;
-    }
-
     const amount = this.$refs.buyAmount as HTMLInputElement;
-
-    // Send Eth to the token contract and get tokens.
-    web3.eth
-      .sendTransaction({
-        from: this.address,
-        to: contractInfo.Token.address,
+    token.methods
+      .buyToken()
+      .send({
+        from: address,
         value: amount.value,
-        gas: 3000000,
-        gasPrice: 1000000000,
+        gas: gasLimit,
+        gasPrice: gasPrice,
       })
-      .on('transactionHash', hash => {
-        this.transactions = [hash].concat(this.transactions);
-        amount.value = '';
-      })
-      .on('receipt', receipt => {
-        // Mining completed.
-        this.fetchBalance();
+      .on('transactionHash', txHash => {
+        this.transactions.push(txHash);
       });
   }
 
-  /**
-   * Called when transfer token form is submited.
-   */
   onTransferToken() {
-    // If web3 is not fetched yet, do nothing.
-    if (web3 === undefined || token === undefined) {
-      return;
-    }
-
-    // Get form inputs
-    const to = this.$refs.recipient as HTMLInputElement;
-    const amount = this.$refs.amount as HTMLInputElement;
-
-    // Send transaction
-    token.methods
-      .transfer(to.value, amount.value)
-      .send({ from: this.address, gas: 3000000, gasPrice: 1000000000 })
-      .on('transactionHash', hash => {
-        // Sending the transaction completed.
-        this.transactions = [hash].concat(this.transactions);
-
-        // Clear the form
-        to.value = '';
-        amount.value = '';
-      })
-      .on('receipt', receipt => {
-        // Mining completed.
-        this.fetchBalance();
-      });
-  }
-
-  /**
-   * Connect to Ethereum blockchain and Fetch all data needed.
-   */
-  async fetchFromBlockchain() {
-    // Wait until the user's accounts are found on MetaMask.
-    const addresses: string[] = await web3.eth.getAccounts();
-
-    // Display the user's address. Vue automatically reload the data and re-render it.
-    this.address = addresses[0];
-
-    // Initialize the Token contract
-    token = new web3.eth.Contract(
-      contractInfo.Token.abi,
-      contractInfo.Token.address
-    );
-
-    // Common parameter that allways needed when interfact with blockchain.
-    const param = { from: this.address };
-
-    // Fetch token name, symbol & decimals from blockchain
-    this.name = await token.methods.name().call(param);
-    this.symbol = await token.methods.symbol().call(param);
-
-    // Fetch total supply
-    const totalSupply: number = await token.methods.totalSupply().call(param);
-
-    // You must handle very big and small number carefully to display correctly.
-    // You can use the default function for this because the token has the same decimals as Eth.
-    this.totalSupply = web3.utils.fromWei(totalSupply, 'ether');
-
-    this.fetchBalance();
-  }
-
-  fetchBalance() {
-    // Fetch balance of the user.
-    token.methods
-      .balanceOf(this.address)
-      .call({ from: this.address })
-      .then(result => {
-        this.balance = web3.utils.fromWei(result, 'ether');
-      });
-  }
-
-  /**
-   * Find web3 inserted by the browser extension such as MetaMask.
-   * web3 is a library to connect to Ethereum blockchain.
-   */
-  fetchWeb3(onFinish: () => void) {
-    window.addEventListener('load', () => {
-      if (typeof window.web3 !== 'undefined') {
-        // Use MetaMask as connector to Ethereum blockchain if it's installed the browser.
-        web3 = new Web3(window.web3.currentProvider);
-        console.log('web3 found.');
-        onFinish();
-      } else {
-        // Otherwise users cannot use this app.
-        alert(
-          'You need Mist, MetaMask or other Dapps browsers to use our Dapp.'
-        );
-      }
+    const to = this.$refs.transferTo as HTMLInputElement;
+    const value = this.$refs.transferValue as HTMLInputElement;
+    token.methods.buyTransfer(to.value, value.value).send({
+      from: address,
+      gas: gasLimit,
+      gasPrice: gasPrice,
     });
   }
 
-  async awaitable(func: (resolve: () => void) => void): Promise<any> {
-    return new Promise(resolve => func(resolve));
+  // HTML要素を配置し終わったら呼ばれる
+  mounted() {
+    // Metamaskの古い0.20から自分で用意した1.0.0に変換している.
+
+    web3 = new Web3(window.web3.currentProvider);
+    web3.eth.getAccounts().then(result => {
+      address = result[0];
+
+      token = new web3.eth.Contract(
+        contractInfo.Token.abi,
+        contractInfo.Token.address
+      );
+      token.methods
+        .symbol()
+        .call({ from: address }) //水色のボタン
+        .then(result => {
+          this.symbol = result;
+        });
+      token.methods
+        .totalSupply()
+        .call({ from: address }) //水色のボタン
+        .then(result => {
+          this.totalSupply = result;
+        });
+      token.methods
+        .balanceOf(address)
+        .call({ from: address }) //水色のボタン
+        .then(result => {
+          this.balance = result;
+        });
+    });
   }
 }
 </script>
