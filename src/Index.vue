@@ -1,24 +1,42 @@
 <template lang="pug">
 div
-  h1 {{ title }}
-  h2 総発行量: {{ totalSupply }} {{ symbol }}
-  h2 あなたの残高: {{ balance }} {{ symbol }}
+  div.navBar-fixed
+    nav.teal
+      div.nav-wrapper
+        a.brand-logo {{ name }}
+          small 合計 {{ totalSupply }} (Wei)
+        ul.right
+          li 収支バランス: {{ balance }} (Wei)
 
-  h2 By Tokens 
-  form(v-on:submit.prevent="onBuyToken")
-    input(type="text" ref="buyAmount")
-    input(type="submit" value="購入")
+  div.container
+    div.row
+      div.col.s12.m6.l6
+        h2 トークン購入
+        form(v-on:submit.prevent="onBuyToken")
+          label(for="buyAmount") 金額 (Wei)
+          input(id="buyAmount" ref="buyAmount" placeholder="1000000000000000000" type="text")
 
-  h2 Transfer Tokens 
-  form(v-on:submit.prevent="onTransferToken")
-    input(type="text" ref="transferTo")
-    input(type="text" ref="transferValue")
-    input(type="submit" value = "送金")
-  h2 Transaction List
-  
-  ol
-    li(v-for="tx in transactions")
+          input.btn(type="submit" value="購入")
+
+      div.col.s12.m6.l6
+        h2 トークン送信
+        form(v-on:submit.prevent="onTransferToken")
+          label(for="recipient") 送信先アドレス
+          input(id="recipient" ref="recipient" placeholder="0xXXXXXXXXXXXXXXXXXXXX" type="text")
+        
+          label(for="amount") 金額 (Wei)
+          input(id="amount" ref="amount" placeholder="1000000000000000000" type="text")
+
+          input.btn(type="submit" value="送金")
+
+  div
+    ul.collection.with-header
+      li.collection-header
+        h4 トランザクションリスト
+      li.collection-item(v-if="transactions.length === 0") 取引なし.
+      li.collection-item(v-for="tx in transactions")
         a(href="#") {{ tx }}
+
 </template>
 
 <script lang="ts">
